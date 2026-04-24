@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Perspective</title>
+    <style>
+        :root {
+            /* Palette matched to your screenshot */
+            --bg-color: #f9f0f2; 
+            --text-color: #333333;
+            --accent-color: #555555;
+        }
+
+        body {
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .quote-box {
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            padding: 30px;
+            width: 300px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        /* Serif Font for the Quote */
+        #quote-text {
+            font-family: "Georgia", "Times New Roman", serif;
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--text-color);
+            margin: 0 0 15px 0;
+            /* matches the lowercase vibe of your navigation */
+            text-transform: lowercase; 
+        }
+
+        /* Sans-Serif for the Author */
+        #quote-author {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            color: var(--accent-color);
+            margin: 0;
+            text-transform: lowercase;
+            letter-spacing: 0.5px;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-color: #d1d1d1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quote-box">
+    <p id="quote-text"></p>
+    <p id="quote-author"></p>
+</div>
+
+<script>
+    const quotes = [
+        { text: "Your silence will not protect you.", author: "audre lorde" },
+        { text: "I am not a woman in terms of my voice. i am not a person. i am a place.", author: "clarice lispector" },
+        { text: "Optimism is the faith that leads to achievement.", author: "helen keller" },
+        { text: "A feminism that is truly inclusive must also be truly intersectional.", author: "chimamanda ngozi adichie" },
+        { text: "We are each other's harvest; we are each other's business; we are each other's magnitude and bond.", author: "gwendolyn brooks" },
+        { text: "Dominator culture has tried to crush the critical thinking of marginalized people, but it has not succeeded.", author: "bell hooks" },
+        { text: "If you're not in the room, they are making decisions about you and they are probably not good ones.", author: "zadie smith" },
+        { text: "I raise up my voice—not so I can shout but so that those without a voice can be heard.", author: "malala yousafzai" },
+        { text: "No need to hurry. no need to sparkle. no need to be anybody but oneself.", author: "virginia woolf" },
+        { text: "I feel that if you are a writer, you should write for people who read, not people who don't.", author: "alice walker" },
+        { text: "Confidence is not 'they will like me.' it's 'i'll be okay if they don't.'", author: "zadie smith" },
+        { text: "For many of us, the hardest part is not starting the race, but having to believe that we can complete it.", author: "malala yousafzai" },
+        { text: "Confidence is quiet. insecurity is loud.", author: "bell hooks" },
+        { text: "The most powerful thing you can do is to raise your voice and have the courage to pursue your dreams.", author: "malala yousafzai" }
+    ];
+
+    function getDailyQuote() {
+        // This creates a "seed" based on the date (Year-Month-Day)
+        const now = new Date();
+        const dateString = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+        
+        // Simple hash function to turn the date string into a number
+        let hash = 0;
+        for (let i = 0; i < dateString.length; i++) {
+            hash = dateString.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        // Use the hash to pick an index from the quotes array
+        const index = Math.abs(hash) % quotes.length;
+        const daily = quotes[index];
+
+        document.getElementById('quote-text').innerText = `“${daily.text}”`;
+        document.getElementById('quote-author').innerText = daily.author;
+    }
+
+    getDailyQuote();
+</script>
+
+</body>
+</html>
