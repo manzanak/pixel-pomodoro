@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Plant Pomodoro Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode Colors */
+            --bg-color: #fdfcf0;
+            --card-bg: #ffffff;
+            --shelf-color: #634335;
+            --pot-color: #343b4e;
+            --plant-green: #5b8a5b;
+            --text-color: #2e2e2e;
+            --accent: #d9ad5f;
+            --border: #2e2e2e;
+        }
+
+        body.dark-mode {
+            /* Dark Mode Colors */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --shelf-color: #3d2b24;
+            --pot-color: #4a546d;
+            --plant-green: #8ebf8e;
+            --text-color: #e0e0e0;
+            --accent: #f2c94c;
+            --border: #000000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'VT323', monospace;
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+
+        .timer-card {
+            background: var(--card-bg);
+            border: 4px solid var(--border);
+            padding: 20px;
+            text-align: center;
+            width: 300px;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+        }
+
+        .plant-display {
+            font-size: 50px;
+            margin: 10px 0;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        #timer {
+            font-size: 70px;
+            line-height: 1;
+            margin: 5px 0;
+            color: var(--plant-green);
+        }
+
+        .status-label {
+            font-size: 24px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        button {
+            font-family: 'VT323', monospace;
+            background: var(--pot-color);
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-bottom: 4px solid rgba(0,0,0,0.3);
+            flex-grow: 1;
+        }
+
+        button:active {
+            border-bottom: 0;
+            transform: translateY(4px);
+        }
+
+        /* Settings Panel */
+        .settings {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        input {
+            width: 50px;
+            background: var(--bg-color);
+            border: 2px solid var(--border);
+            color: var(--text-color);
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .shelf-line {
+            height: 8px;
+            background: var(--shelf-color);
+            width: 110%;
+            margin-left: -5%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="timer-card">
+    <button class="theme-toggle" id="themeBtn">🌙</button>
+    <div class="status-label" id="status">Ready?</div>
+    <div class="plant-display" id="plant">🌱</div>
+    <div id="timer">25:00</div>
+    
+    <div class="controls">
+        <button id="startBtn">START</button>
+        <button id="resetBtn" style="background:#a94b44">RESET</button>
+    </div>
+
+    <div class="settings">
+        <div class="setting-row">
+            <span>Work (min):</span>
+            <input type="number" id="workInput" value="25">
+        </div>
+        <div class="setting-row">
+            <span>Break (min):</span>
+            <input type="number" id="breakInput" value="5">
+        </div>
+        <button id="applyBtn" style="background:var(--plant-green); font-size: 14px; padding: 4px;">APPLY SETTINGS</button>
+    </div>
+
+    <div class="shelf-line"></div>
+</div>
+
+<script>
+    let workTime = 25 * 60;
+    let breakTime = 5 * 60;
+    let timeLeft = workTime;
+    let timerId = null;
+    let isWorking = true;
+
+    const timerDisplay = document.getElementById('timer');
+    const statusLabel = document.getElementById('status');
+    const plantDisplay = document.getElementById('plant');
+    const startBtn = document.getElementById('startBtn');
+    const themeBtn = document.getElementById('themeBtn');
+
+    // Theme Toggle
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        themeBtn.innerHTML = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    });
+
+    function updateTimer() {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        timerDisplay.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Pixel plant growth
+        if (isWorking) {
+            let progress = timeLeft / workTime;
+            if (progress > 0.6) plantDisplay.innerHTML = "🌱";
+            else if (progress > 0.3) plantDisplay.innerHTML = "🌿";
+            else plantDisplay.innerHTML = "🪴";
+        } else {
+            plantDisplay.innerHTML = "✨🍄✨";
+        }
+    }
+
+    function startTimer() {
+        if (timerId !== null) {
+            clearInterval(timerId);
+            timerId = null;
+            startBtn.innerHTML = "START";
+        } else {
+            statusLabel.innerHTML = isWorking ? "Focusing..." : "Resting...";
+            startBtn.innerHTML = "PAUSE";
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    timerId = null;
+                    switchMode();
+                }
+            }, 1000);
+        }
+    }
+
+    function switchMode() {
+        isWorking = !isWorking;
+        timeLeft = isWorking ? workTime : breakTime;
+        statusLabel.innerHTML = isWorking ? "Work Time" : "Break Time";
+        alert(isWorking ? "Back to work!" : "Time for a break!");
+        updateTimer();
+        startTimer();
+    }
+
+    function resetTimer() {
+        clearInterval(timerId);
+        timerId = null;
+        isWorking = true;
+        timeLeft = workTime;
+        statusLabel.innerHTML = "Ready?";
+        startBtn.innerHTML = "START";
+        updateTimer();
+    }
+
+    // Apply Custom Settings
+    document.getElementById('applyBtn').addEventListener('click', () => {
+        workTime = parseInt(document.getElementById('workInput').value) * 60;
+        breakTime = parseInt(document.getElementById('breakInput').value) * 60;
+        resetTimer();
+    });
+
+    startBtn.addEventListener('click', startTimer);
+    document.getElementById('resetBtn').addEventListener('click', resetTimer);
+
+    updateTimer();
+</script>
+
+</body>
+</html>
