@@ -52,12 +52,20 @@
     <div class="shelf"></div>
 </div>
 
+<audio id="alarmSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
 <script>
     let workMin = 25; let breakMin = 5; let timeLeft = workMin * 60; let timerId = null; let isWorking = true;
     const timerDisp = document.getElementById('timer');
     const statusDisp = document.getElementById('status');
     const plantDisp = document.getElementById('plant');
     const startBtn = document.getElementById('startBtn');
+    const alarm = document.getElementById('alarmSound');
+
+    function playAlarm() {
+        alarm.currentTime = 0; // Reset sound to start
+        alarm.play().catch(e => console.log("Audio play blocked until user interaction."));
+    }
 
     function updateDisplay() {
         let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
@@ -70,15 +78,23 @@
     }
 
     function toggleTimer() {
-        if (timerId) { clearInterval(timerId); timerId = null; startBtn.innerText = "START"; }
-        else {
+        if (timerId) { 
+            clearInterval(timerId); timerId = null; startBtn.innerText = "START"; 
+        } else {
             startBtn.innerText = "PAUSE";
             timerId = setInterval(() => {
                 timeLeft--;
                 if (timeLeft < 0) {
-                    clearInterval(timerId); timerId = null; isWorking = !isWorking;
+                    clearInterval(timerId); 
+                    timerId = null; 
+                    playAlarm(); // Trigger Sound
+                    isWorking = !isWorking;
                     timeLeft = (isWorking ? workMin : breakMin) * 60;
+                    startBtn.innerText = "START";
                     updateDisplay();
+                    setTimeout(() => {
+                        alert(isWorking ? "Break's over! Time to focus." : "Great job! Time to rest.");
+                    }, 100);
                 }
                 updateDisplay();
             }, 1000);
